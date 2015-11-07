@@ -12,7 +12,7 @@
                 <div class="progress" style="height:{{getReadPercent()}}%"><span class="bar"></span></div>
         </ul>
     </div>
-    <div class="Reader" data-ui="reader">
+    <div scroll class="Reader" data-ui="reader">
         <div class="Articles">
             <article data-article="{{$index}}" ng-repeat="article in articles" class="Article">
                 <h1>{{article.headline}}</h1>
