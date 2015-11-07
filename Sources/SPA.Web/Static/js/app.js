@@ -30,7 +30,7 @@
     });
 
     app.controller('NewsFeedController', [
-        '$scope', function ($scope) {
+        '$scope', '$http', '$log', '$q', '$timeout', function ($scope, $http, $log, $q, $timeout) {
 
             var init = function () {
                 $scope.articles = [];
@@ -52,36 +52,21 @@
 
             $scope.selectArticle = function (index) {
                 $scope.selectedArticle = index;
+
+                $scope.clickScrolling = true;
                 var el = $("article[data-article='" + index + "']");
                 $("body").animate({ scrollTop: el.offset().top + 1 }, "slow").promise().done(function () { $scope.clickScrolling = false });
                 
             }
 
             $scope.loadArticles = function () {
-                // web api request here
-                $scope.articles = articles;
+                $http.get('/articleapi/articles').success(function (data) {
+                    $scope.articles = data;
+                }).error(function (data) {
+                });
             }
 
 
             init();
         }]);
-
-    var articles = [
-        {
-            headline: 'Article 1',
-            author: 'Jon Price',
-            thumbnail: { path: '/img/thumb/src' },
-            image: { path: '/img/src' },
-            dateTime: '11/12/2015',
-            mainBody: '<em>main body for article 1</em>'
-        },
-        {
-            headline: 'Article 2',
-            author: 'Jon Price',
-            thumbnail: { path: '/img/thumb/src' },
-            image: { path: '/img/src' },
-            dateTime: '11/5/2015',
-            mainBody: '<em>main body for article 2</em>'
-        },
-    ];
 })();
