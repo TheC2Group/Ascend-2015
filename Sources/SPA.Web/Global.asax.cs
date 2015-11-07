@@ -1,4 +1,6 @@
-﻿using System.Web.Mvc;
+﻿using SPA.Web.Business.Initialization;
+using System.Web.Http;
+using System.Web.Mvc;
 
 namespace SPA.Web
 {
@@ -8,7 +10,7 @@ namespace SPA.Web
         {
             AreaRegistration.RegisterAllAreas();
 
-            
+            GlobalConfiguration.Configure(WebApiConfig.Register);
             //Tip: Want to call the EPiServer API on startup? Add an initialization module instead (Add -> New Item.. -> EPiServer -> Initialization Module)
         }
     }
