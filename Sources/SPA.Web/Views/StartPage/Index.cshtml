@@ -3,7 +3,7 @@
 <div class="App" ng-app="newsfeed" ng-controller="NewsFeedController">
     <div class="List" data-ui="list">
         <ul>
-            <li data-article="{{$index}}" data-status="{{isSelected($index)}}" ng-repeat="article in articles" ng-click="selectArticle($index)">
+            <li data-article="{{$index}}" data-status="{{isSelected($index)}}" ng-repeat="article in toc" ng-click="selectArticle($index)">
                 <div class="image"><img data-ui="image" ng-src="{{article.thumbnail.path}}" alt=""></div>
                 <div class="teaser">
                     <h3>{{article.headline}}</h3>
@@ -13,8 +13,8 @@
         </ul>
     </div>
     <div scroll class="Reader" data-ui="reader">
-        <div class="Articles">
-            <article data-article="{{$index}}" ng-repeat="article in articles" class="Article">
+        <div class="Articles" infinite-scroll="loadMore()">
+            <article data-article="{{$index}}" ng-repeat="article in pagedArticles" class="Article">
                 <h1>{{article.headline}}</h1>
                 <p class="author">{{article.author}}
                 <p class="datatime">{{article.dateTime | date:'MM/dd/yyyy @@ h:mma'}}</p>

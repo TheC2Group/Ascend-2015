@@ -1,5 +1,5 @@
 ﻿(function () {
-    var app = angular.module('newsfeed', ['ngSanitize']);
+    var app = angular.module('newsfeed', ['ngSanitize', 'infinite-scroll']);
 
     app.directive('scroll', function () {
         return {
@@ -33,12 +33,17 @@
         '$scope', '$http', '$log', '$q', '$timeout', function ($scope, $http, $log, $q, $timeout) {
 
             var init = function () {
-                $scope.articles = [];
+                $scope.pagedArticles = [];
+                $scope.toc = []
                 $scope.readPercent = 0;
                 $scope.selectedArticle = 0;
                 $scope.clickScrolling = false;
 
-                $scope.loadArticles();
+                $scope.skip = 0;
+                $scope.take = 1;
+                $scope.busy = false;
+
+                $scope.loadToc();
             }
 
             $scope.getReadPercent = function () {
@@ -53,18 +58,50 @@
             $scope.selectArticle = function (index) {
                 $scope.selectedArticle = index;
 
-                $scope.clickScrolling = true;
-                var el = $("article[data-article='" + index + "']");
-                $("body").animate({ scrollTop: el.offset().top + 1 }, "slow").promise().done(function () { $scope.clickScrolling = false });
-                
+                if (index >= $scope.skip) {
+                    $scope.take = index - $scope.skip + 1;
+                    $scope.loadMore().then(function () {
+                        $timeout(function () {
+                            var el = $("article[data-article='" + index + "']");
+                            $scope.clickScrolling = true;
+                            $("body").animate({ scrollTop: el.offset().top + 1 }, "slow").promise().done(function () { $scope.clickScrolling = false });;
+                        });
+                    });
+                } else {
+                    var el = $("article[data-article='" + index + "']");
+                    $scope.clickScrolling = true;
+                    $("body").animate({ scrollTop: el.offset().top + 1 }, "slow").promise().done(function () { $scope.clickScrolling = false });
+                }
             }
 
-            $scope.loadArticles = function () {
-                $http.get('/articleapi/articles').success(function (data) {
-                    $scope.articles = data;
+            $scope.loadToc = function () {
+                $http.get('/articleapi/article/toc').success(function (data) {
+                    $scope.toc = data;
                 }).error(function (data) {
+                    $log.error("TOC/Index not found");
                 });
-            }
+            };
+
+            $scope.loadMore = function () {
+                return $q(function (resolve, reject) {
+                    if ($scope.busy) return;
+                    $scope.busy = true;
+
+                    $http.get('/articleapi/articles?take=' + $scope.take + '&skip=' + $scope.skip).success(function (data) {
+                        for (var i = 0; i < data.length; i++) {
+                            $scope.pagedArticles.push(data[i]);
+                            $scope.skip++;
+
+                        }
+                        $scope.take = 1;
+                        $scope.busy = false;
+                        resolve();
+                    }).error(function (data) {
+                        $log.error("Unable to load article");
+                        reject();
+                    });
+                });
+            };
 
 
             init();
